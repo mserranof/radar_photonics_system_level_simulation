@@ -1,0 +1,22 @@
+T = 1e-6
+B = 100e6
+#ic.addelement("Scripted Optical Source")
+#ic.set("name","FMCW_tri")
+#ic.set("frequency", 3e8/1.55e-6)
+t = mod(TIME, T);
+A = sqrt(0.01);
+
+#// triangle in [-1,1]
+r = 4*(t/T) - 1;
+if (t >= T/2) {{ r = 3 - 4*(t/T); }}
+
+#// Δf(t) = (B/2)*r  ->  phase φ(t) = ∫Δf dt  (in cycles)
+if (t < T/2) {{
+  phi = 0.5*(B/T)*0.5*t^2 - 0.5*B*t;           // integrate (B/2)*(4t/T - 1)
+}} else {{
+  phi_mid = 0.5*(B/T)*0.5*(T/2)^2 - 0.5*B*(T/2);
+  tau = t - T/2;
+  phi = phi_mid + (-0.5*(B/T)*0.5*tau^2 + 0.5*B*tau); // integrate (B/2)*(-4τ/T + 1)
+}}
+tri_script = "OUTPUT = A*exp(i*2*pi*phi);"
+setnamed(chirp,"script", tri_script)

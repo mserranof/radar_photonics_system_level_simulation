@@ -1,0 +1,67 @@
+###############################################################
+# 1. Get photodiode time trace
+###############################################################
+
+t = gettime("PD::output");      # time array
+v = getdata("PD::output", "output");   # voltage / current signal
+
+# Make sure data is real
+v = real(v);
+
+###############################################################
+# 2. Spectrogram parameters (you can tune these)
+###############################################################
+
+fs = 1/(t(2)-t(1));     # sampling rate
+N = length(v);          # total samples
+
+win_time = 200e-9;      # window length = 200 ns (example)
+win = round(win_time * fs);     # samples per window
+overlap = 0.5;          # 50% overlap
+step = round(win*(1-overlap));  # hop size
+
+# Frequency vector for FFT
+Nfft = 2^nextpow2(win);
+f = [0:(Nfft/2-1)] * fs/Nfft;
+
+###############################################################
+# 3. Compute spectrogram
+###############################################################
+
+# Number of windows
+M = floor((N-win)/step);
+
+# Allocate matrix
+S = matrix(M, length(f));
+
+# Hanning window
+w = hann(win);
+
+for (m=1:M) {
+    idx_start = (m-1)*step + 1;
+    idx_end = idx_start + win - 1;
+
+    segment = v(idx_start:idx_end);
+    segment = segment .* w;          # apply window
+
+    # FFT
+    V = fft(segment, Nfft);
+    V = abs(V(1:length(f)));         # keep positive frequencies
+
+    # store into spectrogram matrix
+    S(m, 1:length(f)) = V';
+}
+
+###############################################################
+# 4. Plot spectrogram: time vs frequency
+###############################################################
+
+# Build time axis for each window center
+t_seg = t(1) + ((0:(M-1))*step + win/2)/fs;
+
+# Plot intensity in dB
+Sdb = 20*log10(S/max(S));
+
+visualize(Sdb, "Spectrogram", "Time (s)", "Frequency (Hz)");
+setplot("x format", "Scientific");
+setplot("y format", "Scientific");
