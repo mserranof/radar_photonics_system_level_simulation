@@ -64,10 +64,17 @@ import importlib.util
 import sys
 import os
 
-sys.path.insert(0, "/opt/lumerical/v252/api/python")
-api_path = "/opt/lumerical/v252/api/python/lumapi.py"
-if not os.path.exists(api_path):
-    raise FileNotFoundError(f"Lumerical API not found at {api_path}")
+# Linux
+# sys.path.insert(0, "/opt/lumerical/v252/api/python")
+# api_path = "/opt/lumerical/v252/api/python/lumapi.py"
+# if not os.path.exists(api_path):
+#     raise FileNotFoundError(f"Lumerical API not found at {api_path}")
+
+# Windows
+#default path for current release
+api_path = 'C:\\Program Files\\Lumerical\\v232\\api\\python\\lumapi.py'
+
+
 
 
 # default path for current release
